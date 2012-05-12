@@ -1,10 +1,10 @@
 package irc
 
 import (
-	"strings"
 	"fmt"
-	"time"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func (irc *IRCConnection) AddCallback(eventcode string, callback func(*IRCEvent)) {
@@ -24,10 +24,10 @@ func (irc *IRCConnection) ReplaceCallback(eventcode string, i int, callback func
 			event[i] = callback
 			return
 		}
-		fmt.Printf("Event found, but no callback found at index %d. Use AddCallback\n", i)
+		irc.log.Printf("Event found, but no callback found at index %d. Use AddCallback\n", i)
 		return
 	}
-	fmt.Printf("Event not found. Use AddCallBack\n")
+	irc.log.Printf("Event not found. Use AddCallBack\n")
 }
 
 func (irc *IRCConnection) RunCallbacks(event *IRCEvent) {
@@ -50,13 +50,13 @@ func (irc *IRCConnection) RunCallbacks(event *IRCEvent) {
 	}
 	if callbacks, ok := irc.events[event.Code]; ok {
 		if irc.VerboseCallbackHandler {
-			fmt.Printf("%v (%v) >> %#v\n", event.Code, len(callbacks), event)
+			irc.log.Printf("%v (%v) >> %#v\n", event.Code, len(callbacks), event)
 		}
 		for _, callback := range callbacks {
 			go callback(event)
 		}
 	} else if irc.VerboseCallbackHandler {
-		fmt.Printf("%v (0) >> %#v\n", event.Code, event)
+		irc.log.Printf("%v (0) >> %#v\n", event.Code, event)
 	}
 }
 
@@ -102,7 +102,7 @@ func (irc *IRCConnection) setupCallbacks() {
 
 	irc.AddCallback("PONG", func(e *IRCEvent) {
 		ns, _ := strconv.Atoi64(e.Message)
-		fmt.Printf("Lag: %fs\n", float32((time.Nanoseconds()-ns))/1000/1000/1000)
+		irc.log.Printf("Lag: %fs\n", float32((time.Nanoseconds()-ns))/1000/1000/1000)
 	})
 
 	irc.AddCallback("NICK", func(e *IRCEvent) {

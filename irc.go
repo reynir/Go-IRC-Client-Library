@@ -5,10 +5,11 @@
 package irc
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
-	"bufio"
 	"strings"
 	"time"
 )
@@ -35,7 +36,7 @@ func reader(irc *IRCConnection) {
 				event.Source = msg[1:i]
 				msg = msg[i+1 : len(msg)]
 			} else {
-				fmt.Printf("Misformed msg from server: %#s\n", msg)
+				irc.log.Printf("Misformed msg from server: %#s\n", msg)
 			}
 			if i, j := strings.Index(event.Source, "!"), strings.Index(event.Source, "@"); i > -1 && j > -1 {
 				event.Nick = event.Source[0:i]
@@ -65,7 +66,7 @@ func writer(irc *IRCConnection) {
 		}
 		_, err := irc.socket.Write([]byte(b))
 		if err != nil {
-			fmt.Printf("%s\n", err)
+			irc.log.Printf("%s\n", err)
 			irc.Error <- err
 			break
 		}
@@ -124,7 +125,7 @@ func (irc *IRCConnection) Privmsg(target, message string) {
 }
 
 func (irc *IRCConnection) SendRaw(message string) {
-	fmt.Printf("--> %s\n", message)
+	irc.log.Printf("--> %s\n", message)
 	irc.pwrite <- fmt.Sprintf("%s\r\n", message)
 }
 
@@ -134,16 +135,16 @@ func (i *IRCConnection) Reconnect() os.Error {
 	<-i.syncreader
 	<-i.syncwriter
 	for {
-		fmt.Printf("Reconnecting to %s\n", i.server)
+		irc.log.Printf("Reconnecting to %s\n", i.server)
 		var err os.Error
 		i.socket, err = net.Dial("tcp", i.server)
 		if err == nil {
 			break
 		}
-		fmt.Printf("Error: %s\n", err)
+		irc.log.Printf("Error: %s\n", err)
 	}
 	error = false
-	fmt.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
+	irc.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
 	go reader(i)
 	go writer(i)
 	i.pwrite <- fmt.Sprintf("NICK %s\r\n", i.nick)
@@ -157,7 +158,7 @@ func (i *IRCConnection) Loop() {
 		if i.quitting {
 			break
 		}
-		fmt.Printf("Error: %s\n", e)
+		irc.log.Printf("Error: %s\n", e)
 		error = true
 		i.Reconnect()
 	}
@@ -169,13 +170,13 @@ func (i *IRCConnection) Loop() {
 
 func (i *IRCConnection) Connect(server string) os.Error {
 	i.server = server
-	fmt.Printf("Connecting to %s\n", i.server)
+	irc.log.Printf("Connecting to %s\n", i.server)
 	var err os.Error
 	i.socket, err = net.Dial("tcp", i.server)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
+	irc.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
 	i.pread = make(chan string, 100)
 	i.pwrite = make(chan string, 100)
 	i.Error = make(chan os.Error, 10)
@@ -200,7 +201,8 @@ func IRC(nick, user string) *IRCConnection {
 	irc.Error = make(chan os.Error)
 	irc.nick = nick
 	irc.user = user
-	irc.VerboseCallbackHandler = true
+	irc.VerboseCallbackHandler = false
+	irc.log = log.New(os.Stdout, "", log.LstdFlags)
 	irc.setupCallbacks()
 	return irc
 }
