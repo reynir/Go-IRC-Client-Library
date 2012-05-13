@@ -68,27 +68,27 @@ func (irc *Connection) setupCallbacks() {
 
 	//Version handler
 	irc.AddCallback("CTCP_VERSION", func(e *Event) {
-		irc.SendRaw(fmt.Sprintf("NOTICE %s :\x01VERSION %s\x01", e.Nick, VERSION))
+		irc.SendRawf("NOTICE %s :\x01VERSION %s\x01", e.Nick, VERSION)
 	})
 
 	irc.AddCallback("CTCP_USERINFO", func(e *Event) {
-		irc.SendRaw(fmt.Sprintf("NOTICE %s :\x01USERINFO %s\x01", e.Nick, irc.user))
+		irc.SendRawf("NOTICE %s :\x01USERINFO %s\x01", e.Nick, irc.user)
 	})
 
 	irc.AddCallback("CTCP_CLIENTINFO", func(e *Event) {
-		irc.SendRaw(fmt.Sprintf("NOTICE %s :\x01CLIENTINFO PING VERSION TIME USERINFO CLIENTINFO\x01", e.Nick))
+		irc.SendRawf("NOTICE %s :\x01CLIENTINFO PING VERSION TIME USERINFO CLIENTINFO\x01", e.Nick)
 	})
 
 	irc.AddCallback("CTCP_TIME", func(e *Event) {
 		ltime := time.Now()
-		irc.SendRaw(fmt.Sprintf("NOTICE %s :\x01TIME %s\x01", e.Nick, ltime.String()))
+		irc.SendRawf("NOTICE %s :\x01TIME %s\x01", e.Nick, ltime.String())
 	})
 
-	irc.AddCallback("CTCP_PING", func(e *Event) { irc.SendRaw(fmt.Sprintf("NOTICE %s :\x01%s\x01", e.Nick, e.Message)) })
+	irc.AddCallback("CTCP_PING", func(e *Event) { irc.SendRawf("NOTICE %s :\x01%s\x01", e.Nick, e.Message) })
 
 	irc.AddCallback("437", func(e *Event) {
 		irc.nickcurrent = irc.nickcurrent + "_"
-		irc.SendRaw(fmt.Sprintf("NICK %s", irc.nickcurrent))
+		irc.SendRawf("NICK %s", irc.nickcurrent)
 	})
 
 	irc.AddCallback("433", func(e *Event) {
@@ -97,7 +97,7 @@ func (irc *Connection) setupCallbacks() {
 		} else {
 			irc.nickcurrent = irc.nickcurrent + "_"
 		}
-		irc.SendRaw(fmt.Sprintf("NICK %s", irc.nickcurrent))
+		irc.SendRawf("NICK %s", irc.nickcurrent)
 	})
 
 	irc.AddCallback("PONG", func(e *Event) {

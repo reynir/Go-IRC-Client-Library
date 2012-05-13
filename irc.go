@@ -82,15 +82,15 @@ func pinger(i *Connection) {
 		case <-i.ticker:
 			//Ping if we haven't recived anything from the server within 4 minutes
 			if time.Since(i.lastMessage) >= (4 * time.Minute) {
-				i.SendRaw(fmt.Sprintf("PING %d", time.Now().UnixNano()))
+				i.SendRawf("PING %d", time.Now().UnixNano())
 			}
 		case <-i.ticker2:
 			//Ping every 15 minutes.
-			i.SendRaw(fmt.Sprintf("PING %d", time.Now().UnixNano()))
+			i.SendRawf("PING %d", time.Now().UnixNano())
 			//Try to recapture nickname if it's not as configured.
 			if i.nick != i.nickcurrent {
 				i.nickcurrent = i.nick
-				i.SendRaw(fmt.Sprintf("NICK %s", i.nick))
+				i.SendRawf("NICK %s", i.nick)
 			}
 		}
 	}
@@ -125,6 +125,10 @@ func (irc *Connection) Privmsg(target, message string) {
 func (irc *Connection) SendRaw(message string) {
 	fmt.Printf("--> %s\n", message)
 	irc.pwrite <- fmt.Sprintf("%s\r\n", message)
+}
+
+func (irc *Connection) SendRawf(format string, a ...interface{}) {
+    irc.SendRaw(fmt.Sprintf(format, ...a))
 }
 
 func (i *Connection) Reconnect() error {
