@@ -99,9 +99,10 @@ func (irc *Connection) setupCallbacks() {
 		irc.SendRawf("NICK %s", irc.nickcurrent)
 	})
 
-	irc.AddCallback("PONG", func(e *IRCEvent) {
-		ns, _ := strconv.Atoi64(e.Message)
-		irc.log.Printf("Lag: %fs\n", float32((time.Nanoseconds()-ns))/1000/1000/1000)
+	irc.AddCallback("PONG", func(e *Event) {
+		ns, _ := strconv.ParseInt(e.Message, 10, 64)
+		delta := time.Duration(time.Now().UnixNano() - ns)
+		irc.log.Printf("Lag: %vs\n", delta)
 	})
 
 	irc.AddCallback("NICK", func(e *Event) {

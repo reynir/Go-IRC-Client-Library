@@ -139,16 +139,16 @@ func (i *Connection) Reconnect() error {
 	<-i.syncreader
 	<-i.syncwriter
 	for {
-		irc.log.Printf("Reconnecting to %s\n", i.server)
-		var err os.Error
+		i.log.Printf("Reconnecting to %s\n", i.server)
+		var err error
 		i.socket, err = net.Dial("tcp", i.server)
 		if err == nil {
 			break
 		}
-		irc.log.Printf("Error: %s\n", err)
+		i.log.Printf("Error: %s\n", err)
 	}
-	error = false
-	irc.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
+        error_ = false
+	i.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
 	go reader(i)
 	go writer(i)
 	i.pwrite <- fmt.Sprintf("NICK %s\r\n", i.nick)
@@ -162,8 +162,8 @@ func (i *Connection) Loop() {
 		if i.quitting {
 			break
 		}
-		irc.log.Printf("Error: %s\n", e)
-		error = true
+		i.log.Printf("Error: %s\n", e)
+		error_ = true
 		i.Reconnect()
 	}
 	close(i.pwrite)
@@ -174,13 +174,13 @@ func (i *Connection) Loop() {
 
 func (i *Connection) Connect(server string) error {
 	i.server = server
-	irc.log.Printf("Connecting to %s\n", i.server)
-	var err os.Error
+	i.log.Printf("Connecting to %s\n", i.server)
+	var err error
 	i.socket, err = net.Dial("tcp", i.server)
 	if err != nil {
 		return err
 	}
-	irc.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
+	i.log.Printf("Connected to %s (%s)\n", i.server, i.socket.RemoteAddr())
 	i.pread = make(chan string, 100)
 	i.pwrite = make(chan string, 100)
 	i.Error = make(chan error, 10)
