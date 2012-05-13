@@ -7,7 +7,7 @@ package irc
 import (
 	"log"
 	"net"
-	"os"
+        "time"
 )
 
 type Connection struct {

@@ -124,7 +124,7 @@ func (irc *Connection) Privmsg(target, message string) {
 	irc.pwrite <- fmt.Sprintf("PRIVMSG %s :%s\r\n", target, message)
 }
 
-func (irc *IRCConnection) SendRaw(message string) {
+func (irc *Connection) SendRaw(message string) {
 	irc.log.Printf("--> %s\n", message)
 	irc.pwrite <- fmt.Sprintf("%s\r\n", message)
 }
