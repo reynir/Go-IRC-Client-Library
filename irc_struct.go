@@ -5,8 +5,9 @@
 package irc
 
 import (
+	"log"
 	"net"
-	"time"
+	"os"
 )
 
 type Connection struct {
@@ -27,6 +28,7 @@ type Connection struct {
 	ticker2     <-chan time.Time
 
 	VerboseCallbackHandler bool
+	log                    *log.Logger
 
 	quitting bool
 }
