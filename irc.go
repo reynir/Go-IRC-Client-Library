@@ -133,6 +133,10 @@ func (irc *Connection) SendRawf(format string, a ...interface{}) {
     irc.SendRaw(fmt.Sprintf(format, a...))
 }
 
+func (irc *Connection) GetNick() string {
+    return irc.nickcurrent
+}
+
 func (i *Connection) Reconnect() error {
 	close(i.pwrite)
 	close(i.pread)
