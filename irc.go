@@ -130,7 +130,7 @@ func (irc *IRCConnection) SendRaw(message string) {
 }
 
 func (irc *Connection) SendRawf(format string, a ...interface{}) {
-    irc.SendRaw(fmt.Sprintf(format, ...a))
+    irc.SendRaw(fmt.Sprintf(format, a...))
 }
 
 func (i *Connection) Reconnect() error {
